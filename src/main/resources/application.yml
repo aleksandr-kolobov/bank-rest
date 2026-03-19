@@ -1,8 +1,39 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: bankcards
-#Что нужно сделать:
-#  - Указать настройки подключения к базе данных.
-#  - Указать порт приложения.
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5432/bankcards_db
+    username: postgres
+    password: 1234
+    hikari:
+      schema: bankcards_sch
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS bankcards_sch
+      maximum-pool-size: 10
+      connection-timeout: 10000
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: bankcards_sch
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+
+app:
+  jwt:
+    secretKey: 1BCD38C6C64704B7996E7471DBA317AFC22E37D32BCD3FB8A7FCA3F
+    accessTokenExpiration: 5m
+    refreshTokenExpiration: 30m
+
+#logging.level.root: DEBUG
+
 #  - Настроить параметры безопасности и JWT.
 #  - Включить Swagger UI.
