@@ -3,7 +3,12 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/.idea/workspace.xml
 HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -40,3 +45,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Add to ignore ###
+/mvnw.cmd
+/mvnw
+/.mvn/wrapper/maven-wrapper.properties
