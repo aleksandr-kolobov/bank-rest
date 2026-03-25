@@ -1,5 +1,7 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.api.DefaultApi;
+import com.example.bankcards.service.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,11 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/bankcards/api/v1")
 @RequiredArgsConstructor
-public class CardController //implements CardsApi
-{
-/*
+public class CardController implements DefaultApi {
     private final CardService cardService;
 
+/*
     @Override
     public ResponseEntity<CardResponse> createCard(CardCreateRequest request) {
         CardResponse response = cardService.createCard(request);
@@ -29,5 +30,5 @@ public class CardController //implements CardsApi
     }
 
     // ... другие методы
-    */
+*/
 }
