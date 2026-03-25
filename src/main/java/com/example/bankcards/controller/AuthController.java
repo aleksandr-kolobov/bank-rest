@@ -24,14 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/security/api/v1/auth")
+@RequestMapping(path = "/bankcards/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
-    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CreateUserResponse> register(@Valid @RequestBody CreateUserRequest request) {
         log.info("Register " + request.email());
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(request));

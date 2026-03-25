@@ -16,6 +16,6 @@ public interface RefreshTokenRepository extends CrudRepository<RefreshToken, UUI
 
     Optional<RefreshToken> findByToken(UUID token);
 
-    void deleteByUserId(UUID userId);
+    Iterable<RefreshToken> findByUserId(UUID userId);
 
 }

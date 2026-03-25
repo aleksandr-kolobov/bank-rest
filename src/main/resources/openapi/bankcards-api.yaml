@@ -1,0 +1,289 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса управления картами
+  version: 1.0.0
+  description: API для CRUD операций с картами и переводов
+
+paths:
+  /bankcards/api/v1/cards:
+    post:
+      tags:
+        - Карты
+      summary: Создание карты
+      operationId: createCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreateRequest'
+      responses:
+        '200':
+          description: Карта создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '400':
+          description: Некорректные данные
+
+    get:
+      tags:
+        - Карты
+      summary: Получение списка карт
+      operationId: getCards
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardStatus'
+          description: Фильтрация по статусу
+        - name: ownerId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Фильтрация по владельцу
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCardResponse'
+
+  /bankcards/api/v1/cards/{id}:
+    get:
+      tags:
+        - Карты
+      summary: Получение карты по ID
+      operationId: getCardById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Данные карты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '404':
+          description: Карта не найдена
+
+    put:
+      tags:
+        - Карты
+      summary: Обновление карты
+      operationId: updateCard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardUpdateRequest'
+      responses:
+        '200':
+          description: Карта обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '400':
+          description: Некорректные данные
+
+    delete:
+      tags:
+        - Карты
+      summary: Удаление карты
+      operationId: deleteCard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Карта удалена
+
+  /bankcards/api/v1/cards/transfer:
+    post:
+      tags:
+        - Переводы
+      summary: Перевод между своими картами
+      operationId: transferBetweenCards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Перевод выполнен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Ошибка перевода
+
+components:
+  schemas:
+    CardStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - BLOCKED
+        - EXPIRED
+      description: Статус карты
+
+    CardCreateRequest:
+      type: object
+      required:
+        - ownerId
+        - validityPeriod
+      properties:
+        ownerId:
+          type: string
+          format: uuid
+          description: ID владельца
+        validityPeriod:
+          type: string
+          format: date
+          description: Срок действия карты
+      additionalProperties: false
+
+    CardUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/CardStatus'
+        balance:
+          type: number
+          format: double
+          minimum: 0
+          description: Баланс карты
+      additionalProperties: false
+
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID карты
+        number:
+          type: string
+          pattern: '^\*\*\*\*\s\*\*\*\*\s\*\*\*\*\s\d{4}$'
+          example: "**** **** **** 1234"
+          description: Маскированный номер карты
+        ownerId:
+          type: string
+          format: uuid
+          description: ID владельца
+        validityPeriod:
+          type: string
+          format: date
+          description: Срок действия
+        status:
+          $ref: '#/components/schemas/CardStatus'
+        balance:
+          type: number
+          format: double
+          example: 50000.00
+          description: Баланс
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PageCardResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardResponse'
+        pageable:
+          type: object
+          properties:
+            pageNumber:
+              type: integer
+            pageSize:
+              type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+
+    TransferRequest:
+      type: object
+      required:
+        - fromCardId
+        - toCardId
+        - amount
+      properties:
+        fromCardId:
+          type: string
+          format: uuid
+          description: ID карты отправителя
+        toCardId:
+          type: string
+          format: uuid
+          description: ID карты получателя
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          description: Сумма перевода
+      additionalProperties: false
+
+    TransferResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        fromCardId:
+          type: string
+          format: uuid
+        toCardId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: double
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [SUCCESS, FAILED]

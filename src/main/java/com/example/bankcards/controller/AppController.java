@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping("/security/api/v1/app")
+@RequestMapping("/bankcards/api/v1/app")
 public class AppController {
 
     @GetMapping("/all")

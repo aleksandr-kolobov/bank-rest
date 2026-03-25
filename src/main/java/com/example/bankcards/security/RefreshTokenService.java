@@ -48,7 +48,8 @@ public class RefreshTokenService {
     }
 
     public void deleteRefreshToken(UUID userId) {
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRepository.findByUserId(userId)
+                .forEach(t -> refreshTokenRepository.deleteById(t.getToken()));
     }
 
 }
