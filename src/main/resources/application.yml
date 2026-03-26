@@ -2,15 +2,17 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: dev
   application:
-    name: bankcards
+    name: bankcardscopy
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5432/bankcards_db
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5432/bankcardscopy_db
     username: postgres
     password: 1234
     hikari:
@@ -26,6 +28,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+  security:
+    jwt:
+      secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: 86400000
+      refresh-expiration: 604800000
 
 app:
   jwt:
@@ -33,7 +40,13 @@ app:
     accessTokenExpiration: 5m
     refreshTokenExpiration: 30m
 
-#logging.level.root: DEBUG
+logging:
+  level:
+    com.bank: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.liquibase: INFO
 
-#  - Настроить параметры безопасности и JWT.
-#  - Включить Swagger UI.
+card:
+  encryption:
+    key: ${CARD_ENCRYPTION_KEY:MySecretKey12345}

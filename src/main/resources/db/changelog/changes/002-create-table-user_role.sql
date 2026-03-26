@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset alexkolo:003-create-table-user_role runAlways=false
+--changeset alexkolo:002-create-table-user_role runAlways=false
 
 CREATE TABLE IF NOT EXISTS user_role
 (
