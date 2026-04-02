@@ -1,7 +1,7 @@
 package com.example.bankcards.repository;
 
 import com.example.bankcards.entity.Card;
-import com.example.bankcards.entity.CardStatus;
+import com.example.bankcards.entity.CardStatusCopy;
 import com.example.bankcards.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +28,7 @@ public interface CardRepository extends JpaRepository<Card, UUID>, JpaSpecificat
     List<Card> findByUser(User user);
 
     // Find cards by user and status
-    List<Card> findByUserAndStatus(User user, CardStatus status);
+    List<Card> findByUserAndStatus(User user, CardStatusCopy status);
 
     // Find card by id and user
     Optional<Card> findByIdAndUser(UUID id, User user);
@@ -41,20 +41,20 @@ public interface CardRepository extends JpaRepository<Card, UUID>, JpaSpecificat
     boolean existsByUserAndId(User user, UUID cardId);
 
     // Find cards by status
-    List<Card> findByStatus(CardStatus status);
+    List<Card> findByStatus(CardStatusCopy status);
 
     // Find cards with balance less than specified amount
     List<Card> findByBalanceLessThan(BigDecimal amount);
 
     // Find cards expiring soon (within next 30 days)
-    @Query("SELECT c FROM Card c WHERE c.expiryDate BETWEEN CURRENT_DATE AND CURRENT_DATE + 30")
-    List<Card> findCardsExpiringSoon();
+//    @Query("SELECT c FROM Card c WHERE c.expiryDate BETWEEN CURRENT_DATE AND FUNCTION('DATEADD', 'DAY', 30, CURRENT_DATE)")
+//    List<Card> findCardsExpiringSoon();
 
     // Update card status
     @Modifying
     @Transactional
     @Query("UPDATE Card c SET c.status = :status WHERE c.id = :cardId")
-    int updateCardStatus(@Param("cardId") UUID cardId, @Param("status") CardStatus status);
+    int updateCardStatus(@Param("cardId") UUID cardId, @Param("status") CardStatusCopy status);
 
     // Update card balance
     @Modifying
@@ -67,7 +67,7 @@ public interface CardRepository extends JpaRepository<Card, UUID>, JpaSpecificat
     List<Card> findActiveCardsByUser(@Param("user") User user);
 
     // Count cards by user and status
-    long countByUserAndStatus(User user, CardStatus status);
+    long countByUserAndStatus(User user, CardStatusCopy status);
 
     // Get total balance for user
     @Query("SELECT COALESCE(SUM(c.balance), 0) FROM Card c WHERE c.user.id = :userId AND c.status = 'ACTIVE'")

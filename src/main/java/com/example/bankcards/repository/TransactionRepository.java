@@ -82,8 +82,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
                                           Pageable pageable);
 
     // Get daily transaction summary for user
-    @Query("SELECT DATE(t.transactionDate) as date, COUNT(t) as count, SUM(t.amount) as total " +
-            "FROM Transaction t WHERE t.user = :user AND t.transactionDate >= :startDate " +
-            "GROUP BY DATE(t.transactionDate) ORDER BY DATE(t.transactionDate) DESC")
-    List<Object[]> getDailyTransactionSummary(@Param("user") User user, @Param("startDate") LocalDateTime startDate);
+//    @Query("SELECT FUNCTION('DATE', t.transactionDate) as date, COUNT(t) as count, SUM(t.amount) as total " +
+//            "FROM Transaction t WHERE t.user = :user AND t.transactionDate >= :startDate " +
+//            "GROUP BY FUNCTION('DATE', t.transactionDate) ORDER BY FUNCTION('DATE', t.transactionDate) DESC")
+//    List<Object[]> getDailyTransactionSummary(@Param("user") User user, @Param("startDate") LocalDateTime startDate);
 }

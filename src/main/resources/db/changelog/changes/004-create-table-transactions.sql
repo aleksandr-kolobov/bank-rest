@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     from_card_id      UUID           NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     to_card_id        UUID           NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     amount            DECIMAL(19,2)  NOT NULL,
-    transaction_date  DATE           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    transaction_date  TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     description       VARCHAR(200)
 );
 

@@ -7,6 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -40,7 +41,7 @@ public class Transaction {
 
     @CreationTimestamp
     @Column(name = "transaction_date", nullable = false, updatable = false)
-    private LocalDate transactionDate;
+    private LocalDateTime transactionDate;
 
     @Column(name = "description", length = 200)
     private String description;

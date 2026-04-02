@@ -1,168 +1,126 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.api.*;
-import com.example.bankcards.dto.CardDTO;
-import com.example.bankcards.dto.CardStatus;
-import com.example.bankcards.dto.CreateCardRequest;
-import com.example.bankcards.dto.GetAllCards200Response;
-import com.example.bankcards.dto.GetAllUsers200Response;
-import com.example.bankcards.dto.GetMyCards200Response;
-import com.example.bankcards.dto.GetMyTransactions200Response;
-import com.example.bankcards.dto.TransactionDTO;
-import com.example.bankcards.dto.TransferRequest;
-import com.example.bankcards.dto.UpdateCardStatusRequest;
-import com.example.bankcards.dto.UpdateUserRequest;
-import com.example.bankcards.dto.UserDTO;
+import com.example.bankcards.api.CardManagementApi;
+import com.example.bankcards.dto.*;
 import com.example.bankcards.service.CardService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.NativeWebRequest;
 
-import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RestController
-@RequestMapping("/bankcards")
 @RequiredArgsConstructor
-public class CardController implements CardManagementApi, TransferManagementApi, AdminUserManagementApi {
+public class CardController implements CardManagementApi {
 
     private final CardService cardService;
 
     @Override
-    public ResponseEntity<Void> _deleteUser(UUID userId) {
-        return AdminUserManagementApi.super._deleteUser(userId);
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteUser(UUID userId) {
-        return AdminUserManagementApi.super.deleteUser(userId);
-    }
-
-    @Override
-    public ResponseEntity<GetAllUsers200Response> _getAllUsers(Integer page, Integer size) {
-        return AdminUserManagementApi.super._getAllUsers(page, size);
-    }
-
-    @Override
-    public ResponseEntity<GetAllUsers200Response> getAllUsers(Integer page, Integer size) {
-        return AdminUserManagementApi.super.getAllUsers(page, size);
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> _getUserById(UUID userId) {
-        return AdminUserManagementApi.super._getUserById(userId);
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> getUserById(UUID userId) {
-        return AdminUserManagementApi.super.getUserById(userId);
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> _updateUser(UUID userId, UpdateUserRequest updateUserRequest) {
-        return AdminUserManagementApi.super._updateUser(userId, updateUserRequest);
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> updateUser(UUID userId, UpdateUserRequest updateUserRequest) {
-        return AdminUserManagementApi.super.updateUser(userId, updateUserRequest);
-    }
-
-    @Override
-    public Optional<NativeWebRequest> getRequest() {
-        return CardManagementApi.super.getRequest();
-    }
-
-    @Override
-    public ResponseEntity<Void> _getCardTransactions(UUID cardId, Integer page, Integer size) {
-        return TransferManagementApi.super._getCardTransactions(cardId, page, size);
-    }
-
-    @Override
-    public ResponseEntity<Void> getCardTransactions(UUID cardId, Integer page, Integer size) {
-        return TransferManagementApi.super.getCardTransactions(cardId, page, size);
-    }
-
-    @Override
-    public ResponseEntity<GetMyTransactions200Response> _getMyTransactions(Integer page, Integer size) {
-        return TransferManagementApi.super._getMyTransactions(page, size);
-    }
-
-    @Override
-    public ResponseEntity<GetMyTransactions200Response> getMyTransactions(Integer page, Integer size) {
-        return TransferManagementApi.super.getMyTransactions(page, size);
-    }
-
-    @Override
-    public ResponseEntity<TransactionDTO> _transferBetweenOwnCards(TransferRequest transferRequest) {
-        return TransferManagementApi.super._transferBetweenOwnCards(transferRequest);
-    }
-
-    @Override
-    public ResponseEntity<TransactionDTO> transferBetweenOwnCards(TransferRequest transferRequest) {
-        return TransferManagementApi.super.transferBetweenOwnCards(transferRequest);
-    }
-
-    @Override
-    public ResponseEntity<CardDTO> _createCard(CreateCardRequest createCardRequest) {
-        return CardManagementApi.super._createCard(createCardRequest);
-    }
-
-    @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardDTO> createCard(CreateCardRequest createCardRequest) {
-        return CardManagementApi.super.createCard(createCardRequest);
+        log.debug("Creating card for user: {}", createCardRequest.getUserId());
+        CardDTO createdCard = cardService.createCard(createCardRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCard);
     }
 
     @Override
-    public ResponseEntity<Void> _deleteCard(UUID cardId) {
-        return CardManagementApi.super._deleteCard(cardId);
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<GetMyCards200Response> getMyCards(String maskedCardNumber,
+                                                            CardStatus status,
+                                                            Double minBalance,
+                                                            Double maxBalance,
+                                                            Integer page,
+                                                            Integer size,
+                                                            String sort) {
+        log.debug("Getting my cards with filters - maskedNumber: {}, status: {}, minBalance: {}, maxBalance: {}",
+                maskedCardNumber, status, minBalance, maxBalance);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        CardFilterRequest filter = new CardFilterRequest();
+        filter.setMaskedCardNumber(maskedCardNumber);
+        filter.setStatus(status);
+        filter.setMinBalance(minBalance);
+        filter.setMaxBalance(maxBalance);
+
+        Page<CardDTO> cardsPage = cardService.getMyCards(filter, pageable);
+
+        GetMyCards200Response response = new GetMyCards200Response();
+        response.setContent(cardsPage.getContent());
+        response.setTotalElements((int) cardsPage.getTotalElements());
+        response.setTotalPages(cardsPage.getTotalPages());
+        response.setSize(cardsPage.getSize());
+        response.setNumber(cardsPage.getNumber());
+        response.setFirst(cardsPage.isFirst());
+        response.setLast(cardsPage.isLast());
+        response.setEmpty(cardsPage.isEmpty());
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Void> deleteCard(UUID cardId) {
-        return CardManagementApi.super.deleteCard(cardId);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<GetAllCards200Response> getAllCards(String maskedCardNumber,
+                                                              CardStatus status,
+                                                              Double minBalance,
+                                                              Double maxBalance,
+                                                              Integer page,
+                                                              Integer size) {
+        log.debug("Getting all cards with filters - maskedNumber: {}, status: {}, minBalance: {}, maxBalance: {}",
+                maskedCardNumber, status, minBalance, maxBalance);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        CardFilterRequest filter = new CardFilterRequest();
+        filter.setMaskedCardNumber(maskedCardNumber);
+        filter.setStatus(status);
+        filter.setMinBalance(minBalance);
+        filter.setMaxBalance(maxBalance);
+
+        Page<CardDTO> cardsPage = cardService.getAllCards(filter, pageable);
+
+        GetAllCards200Response response = new GetAllCards200Response();
+        response.setContent(cardsPage.getContent());
+        response.setTotalElements((int) cardsPage.getTotalElements());
+        response.setTotalPages(cardsPage.getTotalPages());
+        response.setSize(cardsPage.getSize());
+        response.setNumber(cardsPage.getNumber());
+        response.setFirst(cardsPage.isFirst());
+        response.setLast(cardsPage.isLast());
+        response.setEmpty(cardsPage.isEmpty());
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<GetAllCards200Response> _getAllCards(String maskedCardNumber, CardStatus status, Double minBalance, Double maxBalance, Integer page, Integer size) {
-        return CardManagementApi.super._getAllCards(maskedCardNumber, status, minBalance, maxBalance, page, size);
-    }
-
-    @Override
-    public ResponseEntity<GetAllCards200Response> getAllCards(String maskedCardNumber, CardStatus status, Double minBalance, Double maxBalance, Integer page, Integer size) {
-        return CardManagementApi.super.getAllCards(maskedCardNumber, status, minBalance, maxBalance, page, size);
-    }
-
-    @Override
-    public ResponseEntity<CardDTO> _getCardById(UUID cardId) {
-        return CardManagementApi.super._getCardById(cardId);
-    }
-
-    @Override
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<CardDTO> getCardById(UUID cardId) {
-        return CardManagementApi.super.getCardById(cardId);
+        log.debug("Getting card by id: {}", cardId);
+        CardDTO card = cardService.getCardById(cardId);
+        return ResponseEntity.ok(card);
     }
 
     @Override
-    public ResponseEntity<GetMyCards200Response> _getMyCards(String maskedCardNumber, CardStatus status, Double minBalance, Double maxBalance, Integer page, Integer size, String sort) {
-        return CardManagementApi.super._getMyCards(maskedCardNumber, status, minBalance, maxBalance, page, size, sort);
-    }
-
-    @Override
-    public ResponseEntity<GetMyCards200Response> getMyCards(String maskedCardNumber, CardStatus status, Double minBalance, Double maxBalance, Integer page, Integer size, String sort) {
-        return CardManagementApi.super.getMyCards(maskedCardNumber, status, minBalance, maxBalance, page, size, sort);
-    }
-
-    @Override
-    public ResponseEntity<CardDTO> _updateCardStatus(UUID cardId, UpdateCardStatusRequest updateCardStatusRequest) {
-        return CardManagementApi.super._updateCardStatus(cardId, updateCardStatusRequest);
-    }
-
-    @Override
+    @PreAuthorize("hasRole('ADMIN') or @cardSecurityService.isCardOwner(#cardId, authentication)")
     public ResponseEntity<CardDTO> updateCardStatus(UUID cardId, UpdateCardStatusRequest updateCardStatusRequest) {
-        return CardManagementApi.super.updateCardStatus(cardId, updateCardStatusRequest);
+        log.debug("Updating card status for cardId: {} to status: {}", cardId, updateCardStatusRequest.getStatus());
+        CardDTO updatedCard = cardService.updateCardStatus(cardId, updateCardStatusRequest.getStatus());
+        return ResponseEntity.ok(updatedCard);
     }
 
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteCard(UUID cardId) {
+        log.debug("Deleting card: {}", cardId);
+        cardService.deleteCard(cardId);
+        return ResponseEntity.noContent().build();
+    }
 }

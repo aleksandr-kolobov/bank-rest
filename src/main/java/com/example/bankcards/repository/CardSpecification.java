@@ -1,7 +1,7 @@
 package com.example.bankcards.repository;
 
+import com.example.bankcards.dto.CardStatus;
 import com.example.bankcards.entity.Card;
-import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.entity.User;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -41,6 +41,28 @@ public class CardSpecification {
         return (root, query, cb) -> maxBalance == null
                 ? cb.conjunction()
                 : cb.lessThanOrEqualTo(root.get("balance"), maxBalance);
+    }
+
+    // НОВЫЙ МЕТОД - объединяет min и max balance
+    public static Specification<Card> byBalanceBetween(Double minBalance, Double maxBalance) {
+        return (root, query, cb) -> {
+            if (minBalance == null && maxBalance == null) {
+                return cb.conjunction();
+            }
+
+            BigDecimal min = minBalance != null ? BigDecimal.valueOf(minBalance) : null;
+            BigDecimal max = maxBalance != null ? BigDecimal.valueOf(maxBalance) : null;
+
+            if (min != null && max != null) {
+                return cb.between(root.get("balance"), min, max);
+            } else if (min != null) {
+                return cb.greaterThanOrEqualTo(root.get("balance"), min);
+            } else if (max != null) {
+                return cb.lessThanOrEqualTo(root.get("balance"), max);
+            } else {
+                return cb.conjunction();
+            }
+        };
     }
 
     public static Specification<Card> byCardholderName(String cardholderName) {

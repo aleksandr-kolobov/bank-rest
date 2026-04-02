@@ -2,6 +2,7 @@ package com.example.bankcards.dto;
 
 import com.example.bankcards.entity.RoleType;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
@@ -30,6 +31,9 @@ public record CreateUserRequest(
 
         @Pattern(regexp = REGEXP_NAME, message = MESSAGE_INCORRECT_NAME)
         String middlename,
+
+        @NotNull
+        Boolean enabled,
 
         @NotEmpty(message = MESSAGE_NO_PARAMETER_AVAILABLE)
         Set<RoleType> roles

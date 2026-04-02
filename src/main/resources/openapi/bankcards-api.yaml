@@ -115,11 +115,13 @@ components:
           format: uuid
         fromCardMask:
           type: string
+          example: "**** **** **** 1234"
         toCardId:
           type: string
           format: uuid
         toCardMask:
           type: string
+          example: "**** **** **** 5678"
         amount:
           type: number
           format: double
@@ -165,12 +167,31 @@ components:
           items:
             $ref: '#/components/schemas/RoleType'
 
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        firstname:
+          type: string
+        lastname:
+          type: string
+        middlename:
+          type: string
+        enabled:
+          type: boolean
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleType'
+
     ErrorResponse:
       type: object
       properties:
         timestamp:
           type: string
-          format: date-time
+          format: date
         status:
           type: integer
         error:
@@ -180,11 +201,99 @@ components:
         path:
           type: string
 
+    GetMyCards200Response:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    GetAllCards200Response:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    GetMyTransactions200Response:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
+    GetAllUsers200Response:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDTO'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+
 security:
   - bearerAuth: []
 
 paths:
-  /api/v1/cards:
+  /bankcards/api/v1/cards:
     post:
       summary: Create a new card
       tags: [Card Management]
@@ -215,7 +324,7 @@ paths:
         '403':
           description: Forbidden
 
-  /api/v1/cards/my-cards:
+  /bankcards/api/v1/cards/my-cards:
     get:
       summary: Get user's own cards
       tags: [Card Management]
@@ -271,32 +380,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CardDTO'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
-                  size:
-                    type: integer
-                  number:
-                    type: integer
-                  sort:
-                    type: object
-                  first:
-                    type: boolean
-                  last:
-                    type: boolean
-                  empty:
-                    type: boolean
+                $ref: '#/components/schemas/GetMyCards200Response'
         '401':
           description: Unauthorized
 
-  /api/v1/cards/all:
+  /bankcards/api/v1/cards/all:
     get:
       summary: Get all cards (Admin only)
       tags: [Card Management]
@@ -344,22 +432,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CardDTO'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
+                $ref: '#/components/schemas/GetAllCards200Response'
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
 
-  /api/v1/cards/{cardId}:
+  /bankcards/api/v1/cards/{cardId}:
     get:
       summary: Get card by ID
       tags: [Card Management]
@@ -415,8 +494,16 @@ paths:
                 $ref: '#/components/schemas/CardDTO'
         '400':
           description: Invalid status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       summary: Delete card (Admin only)
@@ -436,10 +523,14 @@ paths:
           description: Card deleted successfully
         '404':
           description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: Forbidden
 
-  /api/v1/transfers/own-cards:
+  /bankcards/api/v1/transfers/own-cards:
     post:
       summary: Transfer between own cards
       tags: [Transfer Management]
@@ -468,7 +559,7 @@ paths:
         '403':
           description: Forbidden - cards not owned by user
 
-  /api/v1/transfers/my-transactions:
+  /bankcards/api/v1/transfers/my-transactions:
     get:
       summary: Get user's transaction history
       tags: [Transfer Management]
@@ -494,18 +585,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/TransactionDTO'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
+                $ref: '#/components/schemas/GetMyTransactions200Response'
+        '401':
+          description: Unauthorized
 
-  /api/v1/transfers/card/{cardId}/transactions:
+  /bankcards/api/v1/transfers/card/{cardId}/transactions:
     get:
       summary: Get transactions for a specific card
       tags: [Transfer Management]
@@ -534,12 +618,20 @@ paths:
       responses:
         '200':
           description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMyTransactions200Response'
         '403':
           description: Access denied
         '404':
           description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/v1/admin/users:
+  /bankcards/api/v1/admin/users:
     get:
       summary: Get all users (Admin only)
       tags: [Admin User Management]
@@ -565,20 +657,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/UserDTO'
-                  totalElements:
-                    type: integer
-                  totalPages:
-                    type: integer
+                $ref: '#/components/schemas/GetAllUsers200Response'
         '403':
           description: Forbidden
 
-  /api/v1/admin/users/{userId}:
+  /bankcards/api/v1/admin/users/{userId}:
     get:
       summary: Get user by ID
       tags: [Admin User Management]
@@ -601,6 +684,10 @@ paths:
                 $ref: '#/components/schemas/UserDTO'
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     put:
       summary: Update user
@@ -620,16 +707,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                role:
-                  type: string
-                  enum: [ROLE_USER, ROLE_ADMIN]
-                enabled:
-                  type: boolean
+              $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
           description: User updated successfully
@@ -637,6 +715,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDTO'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       summary: Delete user
@@ -656,3 +746,7 @@ paths:
           description: User deleted successfully
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
