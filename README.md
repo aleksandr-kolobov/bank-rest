@@ -26,8 +26,6 @@
     <li>Баланс</li>
   </ul>
 
-<h2>🧾 Требования</h2>
-
 <h3>✅ Аутентификация и авторизация</h3>
   <ul>
     <li>Spring Security + JWT</li>
@@ -67,7 +65,7 @@
 
 <h3>✅ Работа с БД</h3>
   <ul>
-    <li>PostgreSQL или MySQL</li>
+    <li>PostgreSQL</li>
     <li>Миграции через Liquibase (<code>src/main/resources/db/migration</code>)</li>
   </ul>
 
@@ -84,22 +82,7 @@
     <li>Юнит-тесты ключевой бизнес-логики</li>
   </ul>
 
-<h2>📊 Оценка</h2>
-  <ul>
-    <li>Соответствие требованиям</li>
-    <li>Чистота архитектуры и кода</li>
-    <li>Безопасность</li>
-    <li>Обработка ошибок</li>
-    <li>Покрытие тестами</li>
-    <li>ООП и уровни абстракции</li>
-  </ul>
-
 <h2>💡 Технологии</h2>
   <p>
-    Java 17+, Spring Boot, Spring Security, Spring Data JPA, PostgreSQL/MySQL, Liquibase, Docker, JWT, Swagger (OpenAPI)
-  </p>
-
-<h2> 📤 Формат сдачи</h2>
-<p>
-Весь код и изменения принимаются только через git-репозиторий с открытым доступом к проекту. Отправка файлов в любом виде не принимается.
+    Java 17, Spring Boot, Spring Security, Spring Data JPA, PostgreSQL, Liquibase, Docker, JWT, Swagger (OpenAPI)
   </p>
